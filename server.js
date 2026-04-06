@@ -1,0 +1,25 @@
+const express= require("express");
+const mongoose= require("mongoose")
+require("dotenv").config();
+const cors = require("cors");
+const app = express();
+app.use(express.json());
+app.use(cors());
+const PORT= process.env.PORT || 5004;
+const userRoutes =  require("./routes/userRoutes")
+const propertyRoutes = require("./routes/propertyRoutes")
+
+mongoose.connect(process.env.MONGO_URI)
+.then(() =>  console.log("DB CONNECTED"))
+.catch((err) => console.log(err))
+
+app.get("/" , (req, res) => {
+    res.json("API is working")
+})
+
+app.use("/api/users" , userRoutes)
+app.use("/api/properties", propertyRoutes)
+
+app.listen(PORT, () => {
+    console.log(`server is running on ${PORT}`)
+})
