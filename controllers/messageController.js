@@ -30,10 +30,7 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const messages = await Message.find({
-      $or: [
-        { receiver: req.user.id },
-        { sender: req.user.id }
-      ]
+      receiver: req.user.id, 
     })
       .populate("sender", "name email")
       .populate("propertyId", "title");
