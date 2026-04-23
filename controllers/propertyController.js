@@ -16,9 +16,9 @@ const createProperty = async (req, res) => {
         })
 
         const saveProperty = await newProperty.save();
-        return res.status(200).json(saveProperty)
+        return res.status(201).json(saveProperty)
     } catch (err) {
-        return res.status(500).json(err)
+        res.status(500).json({ message: "Server error" });
     }
 }
 
@@ -34,13 +34,13 @@ const getAllProperties = async (req, res) => {
             filter.type = type
         }
         if (price) {
-            filter.price = price
+            filter.price = { $lte: price };
         }
 
         const result = await Property.find(filter).populate("agent")
         return res.status(200).json(result)
     } catch (err) {
-        return res.status(500).json(err)
+        res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -55,7 +55,7 @@ const getById = async (req, res) => {
 
         return res.status(200).json(result)
     } catch (err) {
-        return res.status(500).json(err)
+        res.status(500).json({ message: "Server error" });
     }
 }
 
@@ -73,31 +73,31 @@ const updateProperty = async (req, res) => {
 
         const { title, price, location, type, rooms, image, description } = req.body;
 
-        const result = await Property.findByIdAndUpdate(id, { title, price, location, type, rooms, image, description } , {new:true})
+        const result = await Property.findByIdAndUpdate(id, { title, price, location, type, rooms, image, description }, { new: true })
         return res.status(200).json(result)
     } catch (err) {
-        return res.status(500).json(err)
+        res.status(500).json({ message: "Server error" });
     }
 }
 
-const deleteProperty= async (req,res) => {
-    try{
+const deleteProperty = async (req, res) => {
+    try {
         const id = req.params.id
 
         const property = await Property.findById(id);
-        if(!property) {
-            return res.status(404).json({message: "property not found"})
+        if (!property) {
+            return res.status(404).json({ message: "property not found" })
         }
 
-        if(property.agent.toString() !== req.user.id){
-            return res.status(403).json({message: "not authorized"})
+        if (property.agent.toString() !== req.user.id) {
+            return res.status(403).json({ message: "not authorized" })
         }
 
         const result = await Property.findByIdAndDelete(id)
-        return res.status(200).json({message: "property deleted"})
+        return res.status(200).json({ message: "property deleted" })
     } catch (err) {
-        return res.status(500).json(err)
+        res.status(500).json({ message: "Server error" });
     }
 }
 
-module.exports = {createProperty , getAllProperties, getById , updateProperty, deleteProperty}
+module.exports = { createProperty, getAllProperties, getById, updateProperty, deleteProperty }

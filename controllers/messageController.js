@@ -14,7 +14,7 @@ const sendMessage = async (req, res) => {
       text,
       propertyId,
       sender: req.user.id, // from token
-      receiver,
+      receiver: receiver,
     });
 
     const saved = await newMessage.save();
@@ -30,7 +30,10 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const messages = await Message.find({
-      receiver: req.user.id,
+      $or: [
+        { receiver: req.user.id },
+        { sender: req.user.id }
+      ]
     })
       .populate("sender", "name email")
       .populate("propertyId", "title");
@@ -42,4 +45,22 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages };
+const getConversation = async (req, res) => {
+  try {
+    const messages = await Message.find({
+      $or: [
+        { sender: req.user.id, receiver: req.params.userId },
+        { sender: req.params.userId, receiver: req.user.id }
+      ]
+    })
+      .sort({ createdAt: 1 })
+      .populate("sender", "name")
+      .populate("propertyId", "title");
+
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching conversation" });
+  }
+};
+
+module.exports = { sendMessage, getMessages, getConversation };
