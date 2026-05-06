@@ -9,7 +9,7 @@ const messageSchema = new mongoose.Schema(
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Property",
-      required: true,
+      required: false,
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +19,11 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    type: {
+      type: String,
+      enum: ["property", "contact"],
+      default: "property"
+    }
   },
   { timestamps: true }
 );

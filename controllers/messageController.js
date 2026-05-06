@@ -1,20 +1,41 @@
 const Message = require("../models/Message");
-
+const User = require("../models/User");
+const Property = require("../models/Property");
 
 //  Send Message
 const sendMessage = async (req, res) => {
   try {
-    const { text, propertyId, receiver } = req.body;
+    const { text, propertyId } = req.body;
 
-    if (!text || !propertyId || !receiver) {
-      return res.status(400).json({ message: "All fields required" });
+    if (!text) {
+      return res.status(400).json({ message: "Message text required" });
+    }
+
+    let receiverId;
+
+     if (propertyId) {
+      const property = await Property.findById(propertyId);
+
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      receiverId = property.agent;
+    }  else {
+      const admin = await User.findOne({ role: "admin" });
+
+      if (!admin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+
+      receiverId = admin._id;
     }
 
     const newMessage = new Message({
       text,
-      propertyId,
-      sender: req.user.id, // from token
-      receiver: receiver,
+      propertyId: propertyId || null,
+      sender: req.user.id, 
+      receiver: receiverId ,
     });
 
     const saved = await newMessage.save();
